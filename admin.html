@@ -21,7 +21,7 @@
         <button class="btn btn-full" type="submit">Open Admin Dashboard</button>
         <p id="loginError" class="form-error hidden"></p>
       </form>
-     
+      <small class="demo-note">Demo PIN: <strong>1234</strong>. Change this in <code>config.js</code> before publishing.</small>
     </div>
   </div>
 
@@ -81,9 +81,15 @@
       <section id="view-applicants" class="admin-view hidden">
         <div class="view-actions">
           <div><h2>Applicants</h2><p>Review applications, update status, and schedule interviews.</p></div>
-          <div class="inline-filters">
-            <input id="applicantSearch" class="input" placeholder="Search applicant..." />
-            <select id="applicantStatusFilter" class="input"><option value="">All statuses</option></select>
+          <div class="applicant-toolbar">
+            <div class="inline-filters">
+              <input id="applicantSearch" class="input" placeholder="Search applicant..." />
+              <select id="applicantStatusFilter" class="input"><option value="">All statuses</option></select>
+            </div>
+            <div class="refresh-controls">
+              <button id="refreshApplicantsBtn" class="refresh-button" type="button">↻ Refresh Applicants</button>
+              <span id="applicantRefreshStatus" class="refresh-status">Auto-refresh every 15 seconds</span>
+            </div>
           </div>
         </div>
         <div class="panel">
