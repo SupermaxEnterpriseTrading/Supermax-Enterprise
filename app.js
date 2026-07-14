@@ -26,7 +26,9 @@
     address: "25 F. Alarcon St., Maysan, Valenzuela City",
     contact: "09069484229",
     hrEmail: "",
-    facebookLink: ""
+    facebookLink: "",
+    mapsLink: "https://maps.app.goo.gl/k6s9dzqoc3AuiTNH6",
+    mapsEmbedUrl: "https://www.google.com/maps?q=14.7031475,120.9715062&z=17&output=embed"
   };
 
   const DEFAULT_JOBS = [
@@ -99,8 +101,17 @@
     return remote ? remote.settings : readLocal(LS.settings, DEFAULT_SETTINGS);
   }
   async function saveSettings(settings) {
-    const remote = await api("saveSettings", {settings});
-    if (!remote) writeLocal(LS.settings, settings);
+    if (CFG.API_URL && !CFG.DEMO_MODE) {
+      const remoteSettings = {...settings};
+      let logo = null;
+      if (String(remoteSettings.logo || "").startsWith("data:")) {
+        logo = dataUrlToPayload(remoteSettings.logo, "company-logo");
+        delete remoteSettings.logo;
+      }
+      const remote = await api("saveSettings", {settings: remoteSettings, logo});
+      return remote.settings;
+    }
+    writeLocal(LS.settings, settings);
     return settings;
   }
   async function getJobs(includeAll=false) {
@@ -164,6 +175,14 @@
     });
   }
 
+  function dataUrlToPayload(dataUrl, fallbackName="upload") {
+    const match = String(dataUrl || "").match(/^data:([^;,]+);base64,(.+)$/);
+    if (!match) throw new Error("Invalid image data.");
+    const type = match[1];
+    const ext = type.split("/")[1]?.replace("jpeg", "jpg") || "png";
+    return {name:`${fallbackName}.${ext}`, type, data:match[2]};
+  }
+
   function makeId(prefix="id") { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`; }
   function makeTrackingId(existing=[]) {
     const y = new Date().getFullYear();
@@ -216,6 +235,15 @@
     $("companyDescription").textContent = settings.description;
     $("companyAddress").textContent = settings.address;
     $("companyContact").textContent = settings.contact;
+    const mapAddress = $("mapCompanyAddress");
+    const mapsButton = $("openMapsButton");
+    const mapFrame = $("companyMapFrame");
+    if (mapAddress) mapAddress.textContent = settings.address || "";
+    if (mapsButton) {
+      mapsButton.href = settings.mapsLink || "#";
+      mapsButton.classList.toggle("hidden", !settings.mapsLink);
+    }
+    if (mapFrame && settings.mapsEmbedUrl) mapFrame.src = settings.mapsEmbedUrl;
     [$("brandLogo"), $("footerLogo")].forEach(img => img.src = settings.logo || "");
     const chat = $("messengerChatButton");
     if (chat && settings.facebookLink) {
@@ -341,7 +369,7 @@
         const cls = i<currentIndex?"done":i===currentIndex?"current":"";
         return `<div class="timeline-item ${cls}"><div class="timeline-dot">${i<=currentIndex?"✓":i+1}</div><div class="timeline-content"><strong>${s}</strong><p>${i===currentIndex?"Current application status":i<currentIndex?"Completed":"Pending"}</p></div></div>`;
       }).join("")}</div>`}
-      ${a.status==="For Interview" && a.interviewDate ? `<div class="interview-box"><h4>Interview Schedule</h4><p><strong>Date:</strong> ${formatDate(a.interviewDate+"T00:00:00")}</p><p><strong>Time:</strong> ${escapeHtml(a.interviewTime||"To be confirmed")}</p><p><strong>Location:</strong> ${escapeHtml(a.interviewLocation||settings.address)}</p>${a.interviewNotes?`<p><strong>Note:</strong> ${escapeHtml(a.interviewNotes)}</p>`:""}</div>`:""}`;
+      ${a.status==="For Interview" && a.interviewDate ? `<div class="interview-box"><h4>Interview Schedule</h4><p><strong>Date:</strong> ${formatDate(a.interviewDate+"T00:00:00")}</p><p><strong>Time:</strong> ${escapeHtml(a.interviewTime||"To be confirmed")}</p><p><strong>Location:</strong> ${escapeHtml(a.interviewLocation||settings.address)}</p>${a.interviewNotes?`<p><strong>Note:</strong> ${escapeHtml(a.interviewNotes)}</p>`:""}${settings.mapsLink?`<a class="map-link-inline" href="${escapeHtml(settings.mapsLink)}" target="_blank" rel="noopener">Open interview location in Google Maps →</a>`:""}</div>`:""}`;
   }
 
   $("jobSearch").addEventListener("input",renderJobs);
