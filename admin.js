@@ -58,6 +58,8 @@
     $("settingContact").value=settings.contact||"";
     $("settingHrEmail").value=settings.hrEmail||"";
     $("settingFacebookLink").value=settings.facebookLink||"";
+    $("settingMapsLink").value=settings.mapsLink||"";
+    $("settingMapsEmbedUrl").value=settings.mapsEmbedUrl||"";
   }
 
   function openJobEditor(id=""){
@@ -145,8 +147,8 @@
     const file=$("settingLogo").files[0];
     let logo=settings.logo||"";
     if(file){ if(file.size>2*1024*1024){alert("Logo must be 2 MB or smaller.");return;} logo=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});}
-    settings={companyName:$("settingCompanyName").value.trim(),logo,heroTitle:$("settingHeroTitle").value.trim(),heroSubtitle:$("settingHeroSubtitle").value.trim(),aboutTitle:$("settingAboutTitle").value.trim(),description:$("settingDescription").value.trim(),address:$("settingAddress").value.trim(),contact:$("settingContact").value.trim(),hrEmail:$("settingHrEmail").value.trim(),facebookLink:$("settingFacebookLink").value.trim()};
-    await S.saveSettings(settings);applyBrand();$("settingsSaved").classList.remove("hidden");setTimeout(()=>$("settingsSaved").classList.add("hidden"),1800);
+    settings={companyName:$("settingCompanyName").value.trim(),logo,heroTitle:$("settingHeroTitle").value.trim(),heroSubtitle:$("settingHeroSubtitle").value.trim(),aboutTitle:$("settingAboutTitle").value.trim(),description:$("settingDescription").value.trim(),address:$("settingAddress").value.trim(),contact:$("settingContact").value.trim(),hrEmail:$("settingHrEmail").value.trim(),facebookLink:$("settingFacebookLink").value.trim(),mapsLink:$("settingMapsLink").value.trim(),mapsEmbedUrl:$("settingMapsEmbedUrl").value.trim()};
+    settings=await S.saveSettings(settings);applyBrand();$("settingsSaved").classList.remove("hidden");setTimeout(()=>$("settingsSaved").classList.add("hidden"),1800);
   }
 
   $("loginForm").addEventListener("submit",async e=>{
